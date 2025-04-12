@@ -1,0 +1,115 @@
+script: "/main/endGame.gui_script"
+fonts {
+  name: "default"
+  font: "/builtins/fonts/default.font"
+}
+textures {
+  name: "atlas"
+  texture: "/main/atlas.atlas"
+}
+nodes {
+  position {
+    x: 93.0
+    y: 109.0
+  }
+  type: TYPE_BOX
+  texture: "atlas/menuButton"
+  id: "menuButton"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 480.0
+    y: 320.0
+  }
+  scale {
+    x: 4.0
+    y: 5.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    x: 0.4
+    y: 0.4
+    z: 0.4
+  }
+  type: TYPE_BOX
+  id: "nameMenu"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 0.5
+    y: -24.2
+  }
+  scale {
+    x: 0.25
+    y: 0.2
+  }
+  type: TYPE_BOX
+  texture: "atlas/submitButton"
+  id: "submitButton"
+  parent: "nameMenu"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    y: 11.999999
+  }
+  scale {
+    x: 0.5
+    y: 0.2
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    x: 0.302
+    y: 0.302
+    z: 0.302
+  }
+  type: TYPE_BOX
+  id: "nameBox"
+  parent: "nameMenu"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  scale {
+    x: 2.0
+    y: 3.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_TEXT
+  text: "Enter Name"
+  font: "default"
+  id: "shadowText"
+  parent: "nameBox"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    y: 37.8
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_TEXT
+  text: "Score-0"
+  font: "default"
+  id: "score"
+  parent: "nameMenu"
+  inherit_alpha: true
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT

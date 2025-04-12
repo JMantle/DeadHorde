@@ -1,0 +1,56 @@
+key_trigger {
+  input: KEY_W
+  action: "moveUp"
+}
+key_trigger {
+  input: KEY_A
+  action: "moveLeft"
+}
+key_trigger {
+  input: KEY_S
+  action: "moveDown"
+}
+key_trigger {
+  input: KEY_D
+  action: "moveRight"
+}
+key_trigger {
+  input: KEY_UP
+  action: "shootUp"
+}
+key_trigger {
+  input: KEY_RIGHT
+  action: "shootRight"
+}
+key_trigger {
+  input: KEY_DOWN
+  action: "shootDown"
+}
+key_trigger {
+  input: KEY_LEFT
+  action: "shootLeft"
+}
+key_trigger {
+  input: KEY_1
+  action: "superBullets"
+}
+key_trigger {
+  input: KEY_2
+  action: "assaultRifle"
+}
+key_trigger {
+  input: KEY_BACKSPACE
+  action: "delete"
+}
+key_trigger {
+  input: KEY_L
+  action: "lemon"
+}
+mouse_trigger {
+  input: MOUSE_BUTTON_1
+  action: "touch"
+}
+text_trigger {
+  input: TEXT
+  action: "typing"
+}

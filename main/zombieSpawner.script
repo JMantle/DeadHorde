@@ -1,0 +1,94 @@
+local function spawnZombie(self)
+	-- generate random position off screen to spawn
+	local start_pos = math.random(1,4)
+	local x = 0
+	local y = 0
+	if start_pos == 1 then
+		-- Spawn to the left of the screen
+		x = -10
+		y = math.random(0,640)
+	end
+	if start_pos == 2 then
+		-- Spawn to the right of the screen
+		x = 960
+		y = math.random(0,640)
+	end
+	if start_pos == 3 then
+		-- Spawn at the top of the screen
+		x = math.random(0,960)
+		y = 660
+	end
+	if start_pos == 4 then
+		-- Spawn at the bottom of the screen
+		x = math.random(0,960)
+		y = -10
+	end
+	-- create the position to spawn the bullet
+	local pos = vmath.vector3(x,y,0)
+	-- spawn the zombie in the position
+	local zombie = factory.create("/zombieSpawner#factory",pos)
+	-- check if zombie needs to be lemonized
+	if self.lemon then
+		msg.post(zombie, "lemonize")
+	end
+	-- play the sound
+	msg.post("main:/controller", "spawn")
+	--set self.spawned
+	self.spawned = 0
+	-- set self.numberOfZombies
+	self.numberOfZombies = self.numberOfZombies + 1
+end
+
+function init(self)
+	-- generate random number to use later
+	math.randomseed(os.time())
+	-- discard the first value
+	math.random()
+	-- declare spawnrate variable as it will change over time
+	self.spawnRate = 100
+	-- declare spawnNum to be changed over timer
+	self.spawnNum = 3
+	-- declare self.spawned
+	self.spawned = 0
+	-- declare self.numberOfZombies
+	self.numberOfZombies = 0
+	-- spawning algorithm
+	timer.delay(0.1, true, function()
+		local spawn = math.random(1,self.spawnRate)
+		if spawn == 1 or self.spawned == 30 and ZombiesCanMove then
+			spawn = math.random(1, self.spawnNum)
+			for i = 1, spawn do
+				spawnZombie(self)
+			end
+		else
+			self.spawned = self.spawned + 1
+		end
+		-- increase spawn rate
+		if self.spawnRate > 5 then
+			self.spawnRate = self.spawnRate - 0.05
+		end
+		-- increase spawn number
+		if self.spawnNum < 10 then
+			self.spawnNum = self.spawnNum + 0.001
+		end
+	end)
+	-- declare lemon
+	self.lemon = false
+end
+
+function update(self, dt)
+	if self.numberOfZombies == 0 then
+		spawnZombie(self)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("zombieKilled") then
+		self.numberOfZombies = self.numberOfZombies - 1
+	elseif message_id == hash("lemon") then
+		self.lemon = true
+	elseif message_id == hash("delemon") then
+		self.lemon = false
+	end
+end
+		

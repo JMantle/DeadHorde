@@ -1,0 +1,75 @@
+
+local function changeMusic(self)
+	local node = gui.get_node("musicText")
+	if self.music then
+		gui.set_text(node, "Music: On")
+	else
+		gui.set_text(node, "Music: Off")
+	end
+end
+
+local function changeSound(self)
+	local node = gui.get_node("soundText")
+	if self.sound then
+		gui.set_text(node, "Sound FX: On")
+	else
+		gui.set_text(node, "Sound FX: Off")
+	end
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.music = true
+end
+
+function final(self)
+	msg.post(".", "release_input_focus")
+end
+
+function on_input(self, action_id, action)
+	if action.pressed and gui.pick_node(gui.get_node("menuButton"), action.x, action.y) then
+		--menu button
+		msg.post("main:/controller", "menu")
+	elseif action.pressed and gui.pick_node(gui.get_node("musicOnButton"), action.x, action.y) then
+		--on button
+		if not self.music then
+			self.music = true
+			changeMusic(self)
+			msg.post("main:/controller", "musicOn")
+		end
+	elseif action.pressed and gui.pick_node(gui.get_node("musicOffButton"), action.x, action.y) then
+		--off button
+		if self.music then
+			self.music = false
+			changeMusic(self)
+			msg.post("main:/controller", "musicOff")
+		end
+	elseif action.pressed and gui.pick_node(gui.get_node("soundOnButton"), action.x, action.y) then
+		--on button
+		if not self.sound then
+			self.sound = true
+			changeSound(self)
+			msg.post("main:/controller", "soundOn")
+		end
+	elseif action.pressed and gui.pick_node(gui.get_node("soundOffButton"), action.x, action.y) then
+		--off button
+		if self.sound then
+			self.sound = false
+			changeSound(self)
+			msg.post("main:/controller", "soundOff")
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("preference") then
+		self.music = message.music
+		changeMusic(self)
+		self.sound = message.sound
+		changeSound(self)
+	end
+end
+
+
+
+	

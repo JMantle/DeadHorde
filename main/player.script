@@ -1,0 +1,245 @@
+-- globals
+ZombiesCanMove = true
+
+
+-- pre hashing
+local moveUp = hash("moveUp")
+local moveDown = hash("moveDown")
+local moveLeft = hash("moveLeft")
+local moveRight = hash("moveRight")
+
+local shootUp = hash("shootUp")
+local shootDown = hash("shootDown")
+local shootLeft = hash("shootLeft")
+local shootRight = hash("shootRight")
+
+local superBullets = hash("superBullets")
+local assaultRifle = hash("assaultRifle")
+
+local lemon = hash("lemon")
+
+-- function to handle the player shooting the gun
+local function shoot(self, direction)
+	-- only shoot if the player is able to
+	if self.canShoot == true then
+		-- move the player's gun to point in the direction they are shooting
+		-- defining animation outside of if statement
+		local animation
+		if self.superBullets then
+			animation = hash("S" .. direction)
+		elseif self.assaultRifle then
+			animation = hash("A" .. direction)
+		else
+			animation = hash("N" .. direction)
+		end
+		msg.post("/playerSprite#sprite", "play_animation", { id = animation })
+		-- the sprite needs to move depending on what gun the player has and what way they are facing
+		if self.assaultRifle then
+			if direction == "right" then
+				go.set_position(vmath.vector3(16, -2, 0), "/playerSprite")
+			elseif direction == "left" then
+				go.set_position(vmath.vector3(-35, -1, 0), "/playerSprite")
+			elseif direction == "up" then
+				go.set_position(vmath.vector3(5, 0, 0), "/playerSprite")
+			elseif direction == "down" then
+				go.set_position(vmath.vector3(0, -1, 0), "/playerSprite")
+			end
+		elseif direction == "left" then
+			go.set_position(vmath.vector3(-13, -1, 0), "/playerSprite")
+		else
+			go.set_position(vmath.vector3(), "/playerSprite")
+		end
+		-- find the position to spawn the bullet depending on the way the gun is facing
+		local pos = go.get_position()
+		-- find the position of the tip of the barrel
+		-- for assault rifle
+		if self.assaultRifle then
+			if direction == "right" then
+				pos.y = pos.y + 5
+				pos.x = pos.x + 56
+			elseif direction == "left" then
+				pos.y = pos.y + 10
+				pos.x = pos.x - 75
+			elseif direction == "up" then
+				pos.y = pos.y + 45
+				pos.x = pos.x + 8
+			elseif direction == "down" then
+				pos.y = pos.y - 43
+				pos.x = pos.x + 16
+			end
+		-- other guns
+		else
+			if direction == "right" then
+				pos.y = pos.y + 10
+				pos.x = pos.x + 30
+			elseif direction == "left" then
+				pos.y = pos.y + 10
+				pos.x = pos.x - 30
+			elseif direction == "up" then
+				pos.y = pos.y + 35
+				pos.x = pos.x + 10
+			elseif direction == "down" then
+				pos.y = pos.y - 25
+				pos.x = pos.x + 17
+			end
+		end
+		--play the gunshot sound
+		msg.post("main:/controller", "gunshot")
+		--send message to the factory to spawn the bullet and give the position and direction for the bullet
+		msg.post("bulletSpawner", "shootBullet", {pos = pos , direction = direction, superBullets = self.superBullets})
+		-- do not allow the player to shoot for a second
+		self.canShoot = false
+		-- allow the player to shoot again after a second
+		timer.delay(self.cooldown, false, function() self.canShoot = true end)
+	end
+end
+
+local function takeHit(self)
+	--detect if game should end
+	if self.lives == 1 then
+		--stop the player and zombies from moving
+		msg.post(".", "release_input_focus")
+		ZombiesCanMove = false
+		self.invincible = true
+		-- play animation
+		msg.post("/playerSprite#sprite", "play_animation", { id = hash("dyingPlayer") })
+		go.delete("/instance0")
+		go.set("/playerSprite#sprite", "scale", vmath.vector3(0.115, 0.115, 1))
+		go.set("/playerSprite#sprite", "position", vmath.vector3(-8, -1, 0))
+		msg.post("/score", "endGame") 
+		timer.delay(2.45, false, function() msg.post("main:/controller", "endGame") end)
+		
+	else
+	-- decrease lives both visually and not
+		self.lives = self.lives - 1
+		go.delete("/instance"..self.lives)
+		-- make player invincible for 2 seconds
+		self.invincible = true
+		--remove ivincibility
+		timer.delay(2, false, function() self.invincible = false end)
+	end
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	-- define variables
+	self.direction = vmath.vector3()
+	self.canShoot = true
+	self.invincible =  false
+	self.lives = 3
+	self.canBlink = true
+	self.superBullets = false
+	self.assaultRifle = false
+	self.cooldown = 1
+	self.lemon = false
+	self.canLemon = true
+end
+
+function final(self)
+	msg.post(".", "release_input_focus")
+end
+
+function update(self, dt) 
+	
+	local pos = go.get_position()
+
+	--prevent moving off screen
+	if pos.x < 40 then
+		pos.x = 40
+	end
+	if pos.x > 920 then
+		pos.x = 920
+	end
+	if pos.y > 470 then
+		pos.y = 470
+	end
+	if pos.y < 50 then
+		pos.y = 50
+	end
+	
+	-- move the player
+	go.set_position(pos + self.direction * dt * 200)
+		
+	--only move when the inputs are held
+	self.direction.x = 0
+	self.direction.y = 0
+
+	--make the player blink when they are invincible
+	if self.invincible and self.canBlink and ZombiesCanMove then
+		--prevent this running multiple times before the timer is update
+		self.canBlink = false
+		--move the sprite so far it cannot be seen
+		go.set_position(vmath.vector3(10000,10000,0), "/playerSprite")
+		--move it back after a while
+		timer.delay(0.25, false, function() 
+			go.set_position(vmath.vector3(0, 0, 0), "/playerSprite")
+			--after the same amount of time, allow another iteration of this function to execute
+			timer.delay(0.25, false, function() self.canBlink = true end)
+		end)
+	end
+		
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("hit") and not self.invincible then
+		takeHit(self)
+	elseif message_id == hash("superBulletsConfirmed") then
+		self.superBullets = true
+		self.cooldown = 2
+		msg.post("/playerSprite#sprite", "play_animation", { id = hash("Sright") })
+		timer.delay(20, false, function()
+			self.superBullets = false
+			self.cooldown = 1
+		end)
+	elseif message_id == hash("assaultRifleConfirmed") then
+		self.assaultRifle = true
+		self.cooldown = 0.25
+		msg.post("/playerSprite#sprite", "play_animation", { id = hash("Aright") })
+		timer.delay(15, false, function()
+			self.assaultRifle = false
+			self.cooldown = 1
+		end)
+	end
+end
+
+function on_input(self, action_id, action)
+	-- determine which input does what
+	-- movement inputs
+	if action_id == moveUp then
+		self.direction.y = 1
+	elseif action_id == moveDown then
+		self.direction.y = -1
+	elseif action_id == moveLeft then
+		self.direction.x = -1
+	elseif action_id == moveRight then
+		self.direction.x = 1
+	-- shooting inputs
+	elseif action_id == shootUp then
+		shoot(self, "up")
+	elseif action_id == shootDown then
+		shoot(self, "down")
+	elseif action_id == shootLeft then
+		shoot(self, "left")
+	elseif action_id == shootRight then
+		shoot(self, "right")
+	elseif action_id == superBullets then
+		if not self.superBullets and not self.assaultRifle then
+			msg.post("/coins", "superBullets")
+		end
+	elseif action_id == assaultRifle then
+		if not self.superBullets and not self.assaultRifle then
+			msg.post("/coins", "assaultRifle")
+		end
+	elseif action_id == lemon and self.canLemon then
+		if self.lemon then
+			self.lemon = false
+			msg.post("/zombieSpawner", "delemon")
+		else
+			self.lemon = true
+			msg.post("/zombieSpawner", "lemon")
+		end
+		self.canLemon = false
+		timer.delay(0.5, false, function() self.canLemon = true end)
+	end
+end
+

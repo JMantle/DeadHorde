@@ -1,0 +1,72 @@
+function init(self)
+	self.direction = vmath.vector3()
+	self.canCollide = true
+	self.super = false
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	-- move the bullet continously
+	go.set_position(go.get_position() + self.direction * dt * 400)
+
+	-- delete the bullet when off screen
+	local pos = go.get_position()
+	if pos.x < -10 or pos.x > 1000 or pos.y < -10 or pos.y > 800 then
+		go.delete()
+	end
+end
+
+function fixed_update(self, dt)
+	--
+end
+
+function on_message(self, message_id, message, sender)
+	-- take the direction the bullet is facing from the factory and set the direction accordingly
+	-- also rotate bullet if shooting vertical
+	if message_id == hash("up") then
+		self.direction.y = 1
+		go.set_rotation(vmath.quat_rotation_z(1.5708))
+	elseif message_id == hash("down") then
+		self.direction.y = -1
+		go.set_rotation(vmath.quat_rotation_z(1.5708))
+	elseif message_id == hash("left") then
+		self.direction.x = -1
+	elseif message_id == hash("right") then
+		self.direction.x = 1
+	end
+	if message_id == hash("collision_response") and self.canCollide then
+		self.canCollide = false
+		msg.post(message.other_id, "die")
+		timer.delay(0.01, false, function() self.canCollide = true end)
+	end
+	if message_id == hash("superBullet") then
+		msg.post("#sprite", "play_animation", { id = hash("superBullet") } )
+		self.super = true
+	end
+	if message_id == hash("delete") and not self.super then
+		go.delete()
+	end
+end
+
+function on_input(self, action_id, action)
+	-- Add input-handling code here. The game object this script is attached to
+	-- must have acquired input focus:
+	--
+	--    msg.post(".", "acquire_input_focus")
+	--
+	-- All mapped input bindings will be received. Mouse and touch input will
+	-- be received regardless of where on the screen it happened.
+	-- Learn more: https://defold.com/manuals/input/
+	-- Remove this function if not needed
+end
+
+function on_reload(self)
+	-- Add reload-handling code here
+	-- Learn more: https://defold.com/manuals/hot-reload/
+	-- Remove this function if not needed
+end

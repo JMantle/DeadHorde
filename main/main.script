@@ -1,0 +1,111 @@
+
+local function selectSound(self)
+	if self.sound then
+		sound.play("/sounds#select")
+	end
+end
+
+function init(self)
+
+	msg.post(".", "acquire_input_focus")
+	-- show the title screen when the game is loaded
+	msg.post("#menuProxy", "load")
+	self.currentCollection = "#menuProxy"
+	-- table insert
+	self.data = sys.load(sys.get_save_file("DeadHorde 2.0", "data"))
+	self.music = self.data.music
+	self.sound = self.data.sound
+
+	-- self.data.music = false
+	-- self.data.sound = false
+	-- self.data.leaderboard = {"1_kyl-74200 \n", "2_-0 \n", "3_-0 \n", "4_-0 \n", "5_-0 \n", "6_-0 \n", "7_-0 \n", "8_-0 \n", "9_-0 \n", "10_-0 \n"} 
+	-- sys.save(sys.get_save_file("DeadHorde 2.0", "data"), self.data)
+
+	-- handle music
+	msg.post("/music", "play_sound", {play_id = 1, delay = 0.1})
+	if not self.music then
+		sound.pause("/music", true)
+	end	
+end
+
+function final(self)
+	msg.post(".", "release_input_focus")
+end
+
+function on_message(self, message_id, message, sender)
+	-- show the collection once loaded into memory
+	if message_id == hash("proxy_loaded") then
+		msg.post(sender, "enable")
+	-- load the correct collection when a message is received
+	elseif message_id == hash("startGame") then
+		-- loading game screen when start button is pressed
+		selectSound(self)
+		msg.post(self.currentCollection, "unload")
+		msg.post("#gameProxy", "load")
+		self.currentCollection = "#gameProxy"
+	elseif message_id == hash("endGame") then
+		-- loading game screen when game ends
+		msg.post(self.currentCollection, "unload")
+		msg.post("#endGameProxy", "load")
+		self.currentCollection = "#endGameProxy"
+	elseif message_id == hash("menu") then
+		-- loading game screen when menu button is pressed
+		selectSound(self)
+		msg.post(self.currentCollection, "unload")
+		msg.post("#menuProxy", "load")
+		self.currentCollection = "#menuProxy"
+	elseif message_id == hash("leaderboard") then
+		-- loading leaderboard screen when leaderboard button is pressed
+		selectSound(self)
+		msg.post(self.currentCollection, "unload")
+		msg.post("#leaderboardProxy", "load")
+		self.currentCollection = "#leaderboardProxy"
+	elseif message_id == hash("options") then
+		-- loading options screen when options button is pressed
+		selectSound(self)
+		msg.post(self.currentCollection, "unload")
+		msg.post("#optionsProxy", "load")
+		self.currentCollection = "#optionsProxy"
+		timer.delay(0.05, false, function() msg.post("options:/gui", "preference", {music = self.music, sound = self.sound}) end)
+		-- hold the score to send to the leaderboard when game ends
+	elseif message_id == hash("newScore") then
+		timer.delay(2.5, false, function() msg.post("endGame:/leaderboard", "newScore", {score = message.score}) end)
+	elseif message_id == hash("sound_done") then
+		msg.post("/music", "play_sound", {play_id = 1}) 
+	elseif message_id == hash("musicOn") then
+		-- play music
+		sound.pause("/music", false)
+		--set music variable
+		self.music = true
+		-- save preference
+		self.data.music = true
+		sys.save(sys.get_save_file("DeadHorde 2.0", "data"), self.data)
+	elseif message_id == hash("musicOff") then
+		-- pause music
+		sound.pause("/music", true)
+		--set music variable
+		self.music = false
+		-- save preference
+		self.data.music = false
+		sys.save(sys.get_save_file("DeadHorde 2.0", "data"), self.data)
+	elseif message_id == hash("soundOn") then
+		--set sound variable
+		self.sound = true
+		-- save preference
+		self.data.sound = true
+		sys.save(sys.get_save_file("DeadHorde 2.0", "data"), self.data)
+	elseif message_id == hash("soundOff") then
+		--set sound variable
+		self.sound = false
+		-- save preference
+		self.data.sound = false
+		sys.save(sys.get_save_file("DeadHorde 2.0", "data"), self.data)
+	elseif message_id == hash("gunshot") and self.sound then
+		sound.play("/sounds#shot")
+	elseif message_id == hash("death") and self.sound then
+		sound.play("/sounds#death")
+	elseif message_id == hash("spawn") and self.sound then
+		sound.play("/sounds#spawn")
+	end
+end
+

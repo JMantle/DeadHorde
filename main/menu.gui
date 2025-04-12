@@ -1,0 +1,59 @@
+script: "/main/menu.gui_script"
+fonts {
+  name: "default"
+  font: "/builtins/fonts/default.font"
+}
+textures {
+  name: "atlas"
+  texture: "/main/atlas.atlas"
+}
+nodes {
+  position {
+    x: 480.0
+    y: 320.0
+  }
+  color {
+    x: 0.0
+    y: 0.502
+    z: 0.0
+  }
+  type: TYPE_BOX
+  texture: "atlas/startButton"
+  id: "startButton"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 865.0
+    y: 61.0
+  }
+  color {
+    x: 0.702
+    y: 0.102
+    z: 0.102
+  }
+  type: TYPE_BOX
+  texture: "atlas/leaderboardButton"
+  id: "leaderboardButton"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 865.0
+    y: 161.0
+  }
+  color {
+    x: 0.702
+    y: 0.102
+    z: 0.102
+  }
+  type: TYPE_BOX
+  texture: "atlas/optionsButton"
+  id: "optionsButton"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT

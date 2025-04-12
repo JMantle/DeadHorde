@@ -1,0 +1,68 @@
+function init(self)
+	self.canMove = true
+	self.canChange = true
+end
+
+function update(self, dt)
+	--  making a vector for the player
+	local playerPos = vmath.vector3(go.get_position("player"))
+	-- making the vector for the zombie
+	local zombiePos = vmath.vector3(go.get_position())
+	-- making the vector from the zombie to the player
+	local direction = playerPos - zombiePos
+	-- calculate the magnitude of the vector
+	local directionMagnitude = math.sqrt(math.pow(direction.x, 2) + math.pow(direction.y, 2) + math.pow(direction.z, 2))
+	-- dividing the vector by its magnitude to find it's unit vector
+	direction = direction / directionMagnitude
+
+	--declaring animation to be used in if statement
+	local animation
+	
+	-- change direction of zombie if needed
+	if self.canMove and self.canChange then
+		if direction.x >= 0 then
+			-- facing right
+			animation = hash("right")
+		else
+			-- facing left
+			animation = hash("left")
+		end
+	
+		-- change the look of the sprite
+		msg.post("#sprite", "play_animation", { id = animation })
+	end
+		
+	-- move the zombie
+	if self.canMove and ZombiesCanMove then
+		go.set_position(zombiePos + direction * dt * 50)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("die") then
+		-- prevent multiple additions of score
+		if self.canMove then
+			-- play death sound
+			msg.post("main:/controller", "death")
+			-- add score
+			msg.post("/score", "zombieKilled")
+			msg.post("/coins", "zombieKilled")
+			self.canMove = false
+			msg.post("#sprite", "play_animation", { id = hash("dyingZombie") })
+			--delete the bullet
+			msg.post(sender, "delete")
+			-- stop collisions
+			msg.post("#collisionobject", "disable")
+			-- decrease zombie number for the factory
+			msg.post("/zombieSpawner", "zombieKilled")
+			--delete the zombie
+			timer.delay(0.25, false, function() go.delete() end)
+		end
+	end
+	if message_id == hash("collision_response") and message.other_id == hash("/player") then
+		msg.post(message.other_id, "hit")
+	elseif message_id == hash("lemonize") then
+		msg.post("#sprite", "play_animation", { id = hash("lemon") })
+		self.canChange = false
+	end
+end

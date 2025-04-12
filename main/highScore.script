@@ -1,0 +1,7 @@
+function init(self)
+	-- the top score from the leaderboard needs to be read and presented when the object is proxy_loaded
+	-- the data needs to be taken from save file
+	self.data = sys.load(sys.get_save_file("DeadHorde 2.0", "data"))
+	label.set_text("#label", "High Score: " .. string.sub(self.data.leaderboard[1], string.find(self.data.leaderboard[1], "_") + 1, string.len(self.data.leaderboard[1])))
+end
+

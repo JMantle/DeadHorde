@@ -1,0 +1,84 @@
+local function takeline(text, labelName)
+	local endOfLine = string.find(text, "\n")
+	local string = string.sub(text, 0, endOfLine)
+	label.set_text(labelName, string)
+	text = string.sub(text, endOfLine + 1)
+	return text
+end
+
+function init(self)
+	-- when the leaderboard object is loaded, the leaderboard needs to be fetched from save
+	self.data = sys.load(sys.get_save_file("DeadHorde 2.0", "data"))
+	self.scores = self.data.leaderboard
+	local text = ""
+	for i = 1, 10 do
+		text = text .. self.scores[i]
+	end
+	-- show data
+	text = takeline(text, "#gold")
+	text = takeline(text, "#silver")
+	text = takeline(text, "#bronze")
+	label.set_text("#label", text)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("newScore") then
+		local newScore = message.score 
+		local cascaded = false
+		for i = 1, 10 do
+			if tonumber(string.sub(self.scores[i], string.find(self.scores[i], "-")+1, string.len(self.scores[i]))) < newScore and not cascaded then
+				-- send massage to gui to allow player to enter name
+				msg.post("/gui", "getName", {score = newScore, place = i})
+				-- cascade scores
+				local tempScoreNew = "-" .. newScore .. " " .. "\n"
+				for n = i, 10 do
+					local tempScoreOld = self.scores[n]
+					self.scores[n] = tostring(n) .. "_" .. tempScoreNew
+					if not string.find(tempScoreOld, "_")  then
+						print("error in cascade")
+					else
+						tempScoreNew = string.sub(tempScoreOld, string.find(tempScoreOld, "_") + 1, string.len(tempScoreOld))
+					end
+				end
+				cascaded = true
+			end
+		end
+		-- save new table
+		self.data.leaderboard = self.scores
+		sys.save(sys.get_save_file("DeadHorde 2.0", "data"), self.data)
+		-- put table back into text form
+		local string = ""
+		for i = 1, 10 do
+			string = string .. self.scores[i]
+		end
+		-- display leaderboard
+		string = takeline(string, "#gold")
+		string = takeline(string, "#silver")
+		string = takeline(string, "#bronze")
+		label.set_text("#label",string)
+	-- change the leaderboard if the player decides to enter a name
+	elseif message_id == hash("nameRecieved") then
+		--replace empty name with the name given
+		if not string.find(self.scores[message.place], "-") then
+			print("error when name recieved")
+		else
+			self.scores[message.place] = message.place .. "_" .. message.name .. string.sub(self.scores[message.place], string.find(self.scores[message.place], "-") + 0, string.len(self.scores[message.place]))
+		end
+		-- put the scores back into a string but finding the index of the score the player got
+		local string = ""
+		for i = 1, 10 do
+			string = string .. self.scores[i]
+		end
+		
+		-- save the scores
+		self.data.leaderboard = self.scores
+		sys.save(sys.get_save_file("DeadHorde 2.0", "data"), self.data)
+
+		-- display the scores
+		string = takeline(string, "#gold")
+		string = takeline(string, "#silver")
+		string = takeline(string, "#bronze")
+		label.set_text("#label",string)
+	end
+end
+

@@ -1,0 +1,45 @@
+function init(self)
+	gui.set_enabled(gui.get_node("nameMenu"), false)
+	msg.post(".", "acquire_input_focus")
+	self.canType = true
+	self.name = ""
+	self.deleted = false
+	self.place = 0
+end
+
+function final(self)
+	msg.post(".", "release_input_focus")
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("typing") and string.len(self.name .. action.text) <= 3 and self.canType then
+		self.name = self.name .. action.text
+		gui.set_text(gui.get_node("shadowText"), self.name)
+	elseif action_id == hash("delete") and not self.deleted and self.canType then
+		if string.len(self.name) == 1 then
+			self.name = ""
+		else
+			local newString = string.sub(self.name, 0, string.len(self.name) - 1)
+			self.name = newString
+		end
+		gui.set_text(gui.get_node("shadowText"), self.name)
+		self.deleted = true
+		timer.delay(0.2, false, function() self.deleted = false end)
+	-- making the gui button functional
+	elseif action_id == hash("touch") and gui.pick_node(gui.get_node("menuButton"), action.x, action.y) then
+		--menu button
+		msg.post("main:/controller", "menu")
+	elseif action_id == hash("touch") and gui.pick_node(gui.get_node("submitButton"), action.x, action.y) then
+		self.canType = false
+		gui.set_enabled(gui.get_node("nameMenu"), false)
+		msg.post("/leaderboard", "nameRecieved", {name = self.name, place = self.place})
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("getName") then
+		gui.set_enabled(gui.get_node("nameMenu"), true)
+		self.place = message.place
+		gui.set_text(gui.get_node("score"), "Score: " .. message.score)
+	end
+end

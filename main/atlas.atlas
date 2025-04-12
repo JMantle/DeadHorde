@@ -1,0 +1,133 @@
+images {
+  image: "/graphics/assaultRiflePlayer/Adown.png"
+}
+images {
+  image: "/graphics/assaultRiflePlayer/Aleft.png"
+}
+images {
+  image: "/graphics/assaultRiflePlayer/Aright.png"
+}
+images {
+  image: "/graphics/assaultRiflePlayer/Aup.png"
+}
+images {
+  image: "/graphics/bullets/normalBullet.png"
+}
+images {
+  image: "/graphics/bullets/superBullet.png"
+}
+images {
+  image: "/graphics/coin.png"
+}
+images {
+  image: "/graphics/gunIcons/assaultRifleGun.png"
+}
+images {
+  image: "/graphics/gunIcons/superBulletsGun.png"
+}
+images {
+  image: "/graphics/screens/gameOverScreen.png"
+}
+images {
+  image: "/graphics/screens/leaderboardScreen.png"
+}
+images {
+  image: "/graphics/screens/menu screen.png"
+}
+images {
+  image: "/graphics/screens/optionsScreen.png"
+}
+images {
+  image: "/graphics/superBulletsPlayer/Sdown.png"
+}
+images {
+  image: "/graphics/superBulletsPlayer/Sleft.png"
+}
+images {
+  image: "/graphics/superBulletsPlayer/Sright.png"
+}
+images {
+  image: "/graphics/superBulletsPlayer/Sup.png"
+}
+images {
+  image: "/graphics/zombie/left.png"
+}
+images {
+  image: "/graphics/zombie/right.png"
+}
+images {
+  image: "/graphics/screens/gameScreen.png"
+}
+images {
+  image: "/graphics/buttons/leaderboardButton.png"
+}
+images {
+  image: "/graphics/buttons/optionsButton.png"
+}
+images {
+  image: "/graphics/buttons/startButton.png"
+}
+images {
+  image: "/graphics/heart.png"
+}
+images {
+  image: "/graphics/normalGunPlayer/Nup.png"
+}
+images {
+  image: "/graphics/normalGunPlayer/Nright.png"
+}
+images {
+  image: "/graphics/normalGunPlayer/Nleft.png"
+}
+images {
+  image: "/graphics/normalGunPlayer/Ndown.png"
+}
+images {
+  image: "/graphics/buttons/menuButton.png"
+}
+images {
+  image: "/graphics/buttons/offButton.png"
+}
+images {
+  image: "/graphics/buttons/onButton.png"
+}
+images {
+  image: "/graphics/buttons/submitButton.png"
+}
+images {
+  image: "/graphics/lemon.png"
+}
+animations {
+  id: "dyingZombie"
+  images {
+    image: "/graphics/dyingZombie/1st.png"
+  }
+  images {
+    image: "/graphics/dyingZombie/2nd.png"
+  }
+  images {
+    image: "/graphics/dyingZombie/3rd.png"
+  }
+  fps: 12
+}
+animations {
+  id: "dyingPlayer"
+  images {
+    image: "/graphics/dyingPlayer/1.png"
+  }
+  images {
+    image: "/graphics/dyingPlayer/2.png"
+  }
+  images {
+    image: "/graphics/dyingPlayer/3.png"
+  }
+  images {
+    image: "/graphics/dyingPlayer/4.png"
+  }
+  images {
+    image: "/graphics/dyingPlayer/5.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 2
+}
+extrude_borders: 2

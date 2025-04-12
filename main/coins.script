@@ -1,0 +1,22 @@
+function init(self)
+	self.coins = 0
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("zombieKilled") then
+		self.coins = self.coins + 1
+		label.set_text("#label", self.coins )
+	elseif message_id == hash("superBullets") then
+		if self.coins >= 30 then
+			self.coins = self.coins - 30
+			label.set_text("#label", self.coins)
+			msg.post("/player", "superBulletsConfirmed")
+		end
+	elseif message_id == hash("assaultRifle") then
+		if self.coins >= 40 then
+			self.coins = self.coins - 40
+			label.set_text("#label", self.coins)
+			msg.post("/player", "assaultRifleConfirmed")
+		end
+	end
+end
